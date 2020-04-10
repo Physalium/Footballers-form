@@ -27,16 +27,16 @@ namespace Footballers
         #endregion Prop
         #region Zdarzenie własne
         //rejestracja zdarzenia tak, żeby możliwe było jego bindowanie
-        public static readonly RoutedEvent NumberChangedEvent =
+        public static readonly RoutedEvent TextChangedEvent =
         EventManager.RegisterRoutedEvent("TabItemSelected",
                      RoutingStrategy.Bubble, typeof(RoutedEventHandler),
                      typeof(TextBoxWithErrorProvider));
 
         //definicja zdarzenia NumberChanged
-        public event RoutedEventHandler NumberChanged
+        public event RoutedEventHandler TextChanged
         {
-            add { AddHandler(NumberChangedEvent, value); }
-            remove { RemoveHandler(NumberChangedEvent, value); }
+            add { AddHandler(TextChangedEvent, value); }
+            remove { RemoveHandler(TextChangedEvent, value); }
         }
 
         //Metoda pomocnicza wywołująca zdarzenie
@@ -45,7 +45,7 @@ namespace Footballers
         {
             //argument zdarzenia
             RoutedEventArgs newEventArgs =
-                    new RoutedEventArgs(TextBoxWithErrorProvider.NumberChangedEvent);
+                    new RoutedEventArgs(TextBoxWithErrorProvider.TextChangedEvent);
             //wywołanie zdarzenia
             RaiseEvent(newEventArgs);
         }
@@ -75,7 +75,7 @@ namespace Footballers
 
         public void SetError(string errorText)
         {
-            if (errorText == "")
+            if (string.IsNullOrEmpty( errorText))
             {
                 border.BorderThickness = new System.Windows.Thickness(0);
                 tooltipW.Visibility = System.Windows.Visibility.Hidden;

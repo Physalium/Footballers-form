@@ -2,26 +2,74 @@
 
 namespace Footballers.ViewModel
 {
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using System.Windows.Input;
+
     using Footballers.Model;
     using Footballers.ViewModel.BaseClass;
-    using System.Windows.Input;
 
     internal class FootballersForm : ViewModelBase
     {
         #region prop
 
-        public List<Footballer> storedFootballers = new List<Footballer>();
-        public Footballer selectedFootballer { get; set; }
-        public string Forename { get; set; }
-        public string Surname { get; set; }
-        public double? Age { get; set; }
-        public double? Weight { get; set; }
+        private double? age = null;
+
+        private string forename = null;
+
+        private string surname = null;
+
+        private double? weight = null;
+
+        public double? Age
+        {
+            get => age; set
+            {
+                age = value;
+                OnPropertyChanged(nameof(Age));
+            }
+        }
+        public string Forename
+        {
+            get => forename; set
+            {
+                forename = value;
+                OnPropertyChanged(nameof(Forename));
+            }
+        }
+
+        public Footballer SelectedFootballer { get; set; } = null;
+        public ObservableCollection<Footballer> StoredFootballers { get; set;} = new ObservableCollection<Footballer>() { new Footballer("janek", "kowalski", 60, 60) };
+        public string Surname
+        {
+            get => surname; set
+            {
+                surname = value;
+                OnPropertyChanged(nameof(Surname));
+            }
+        }
+        public double? Weight
+        {
+            get => weight; set
+            {
+                weight = value;
+                OnPropertyChanged(nameof(Weight));
+            }
+        }
 
         #endregion prop
 
         #region commands
 
         private ICommand add;
+
+        private ICommand clear;
+
+        private ICommand copy;
+
+        private ICommand delete;
+
+        private ICommand edit;
 
         public ICommand Add
         {
@@ -33,10 +81,10 @@ namespace Footballers.ViewModel
                         execute =>
                         {
                             var footballer = new Footballer(Forename, Surname, (double)Age, (double)Weight);
-                            if (!storedFootballers.Contains(footballer))
+                            if (!StoredFootballers.Contains(footballer))
                             {
-                                storedFootballers.Add(footballer);
-                                OnPropertyChanged(nameof(storedFootballers));
+                                StoredFootballers.Add(footballer);
+                                OnPropertyChanged(nameof(StoredFootballers));
                             }
                         }
                         , canExecute => FieldsNotNull
@@ -46,50 +94,6 @@ namespace Footballers.ViewModel
             }
         }
 
-        private ICommand delete;
-
-        public ICommand Delete
-        {
-            get
-            {
-                if (delete is null)
-                {
-                    delete = new RelayCommand(execute =>
-                    {
-                        var footballer = new Footballer(Forename, Surname, (double)Age, (double)Weight);
-                        if (storedFootballers.Contains(footballer))
-                        {
-                            storedFootballers.Remove(footballer);
-                            OnPropertyChanged(nameof(storedFootballers));
-                        }
-                    }, canExecute => FieldsNotNull && selectedFootballer != null);
-                }
-                return delete;
-            }
-        }
-
-        private ICommand edit;
-
-        public ICommand Edit
-        {
-            get
-            {
-                if (edit is null)
-                {
-                    edit = new RelayCommand(execute =>
-                    {
-                        var newFootballer = new Footballer(Forename, Surname, (double)Age, (double)Weight);
-                        if (storedFootballers.Contains(selectedFootballer))
-                        {
-                            storedFootballers.Find(footballer => footballer.Equals(selectedFootballer)).Copy(newFootballer);
-                            OnPropertyChanged(nameof(storedFootballers));
-                        }
-                    }, canExecute => FieldsNotNull && selectedFootballer != null);
-                }
-                return edit;
-            }
-        }
-        private ICommand clear;
         public ICommand Clear
         {
             get
@@ -109,7 +113,6 @@ namespace Footballers.ViewModel
             }
         }
 
-        private ICommand copy;
         public ICommand Copy
         {
             get
@@ -119,10 +122,10 @@ namespace Footballers.ViewModel
                     copy = new RelayCommand(
                         execute =>
                         {
-                            Forename = selectedFootballer.Forename;
-                            Surname = selectedFootballer.Surname;
-                            Age = selectedFootballer.Age;
-                            Weight = selectedFootballer.Weight;
+                            Forename = SelectedFootballer.Forename;
+                            Surname = SelectedFootballer.Surname;
+                            Age = SelectedFootballer.Age;
+                            Weight = SelectedFootballer.Weight;
                         }
                         , canExecute => true
                     );
@@ -131,13 +134,53 @@ namespace Footballers.ViewModel
             }
         }
 
-        #endregion commands
+        public ICommand Delete
+        {
+            get
+            {
+                if (delete is null)
+                {
+                    delete = new RelayCommand(execute =>
+                    {
+                        var footballer = new Footballer(Forename, Surname, (double)Age, (double)Weight);
+                        if (StoredFootballers.Contains(footballer))
+                        {
+                            StoredFootballers.Remove(footballer);
+                            OnPropertyChanged(nameof(StoredFootballers));
+                        }
+                    }, canExecute => FieldsNotNull && SelectedFootballer != null);
+                }
+                return delete;
+            }
+        }
 
-        private bool FieldsNotNull { get { return (Forename != null && Surname != null && Age != null && Weight != null); } }
+        public ICommand Edit
+        {
+            get
+            {
+                if (edit is null)
+                {
+                    edit = new RelayCommand(execute =>
+                    {
+                        var newFootballer = new Footballer(Forename, Surname, (double)Age, (double)Weight);
+                        if (StoredFootballers.Contains(SelectedFootballer))
+                        {
+                            StoredFootballers.Single(footballer => footballer.Equals(SelectedFootballer)).Copy(newFootballer);
+                            OnPropertyChanged(nameof(StoredFootballers));
+                        }
+                    }, canExecute => FieldsNotNull && SelectedFootballer != null);
+                }
+                return edit;
+            }
+        }
+
+        #endregion commands
 
         public FootballersForm()
         {
             //wczytywanie z json
         }
+
+        private bool FieldsNotNull { get { return (!string.IsNullOrEmpty(Forename) && !string.IsNullOrEmpty(Surname) && Age > 0 && Weight > 0); } }
     }
 }

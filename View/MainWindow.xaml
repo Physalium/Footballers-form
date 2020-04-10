@@ -19,9 +19,9 @@
         <StackPanel Grid.Column="0">
 
             <Label  Content="Imię:" Margin="10" FontSize="15" />
-            <local:TextBoxWithErrorProvider x:Name="forename" Margin="10" Text="{Binding Path=Forename, Mode=TwoWay}" />
+            <local:TextBoxWithErrorProvider Margin="10" Text="{Binding Path=Forename, Mode=TwoWay}" />
             <Label Content="Nazwisko:" Margin="10" FontSize="15" />
-            <local:TextBoxWithErrorProvider x:Name="surname" Margin="10" Text="{Binding Path=Surname, Mode=TwoWay}" />
+            <local:TextBoxWithErrorProvider  Margin="10" Text="{Binding Path=Surname, Mode=TwoWay}" />
 
             <WrapPanel  Margin="0" Orientation="Horizontal">
                 <Label Content="Wiek: " FontSize="15" Width="50" HorizontalAlignment="Left" />
@@ -29,12 +29,12 @@
 
                 <Slider x:Name="sliderAge"  Width="300" Margin="5" BorderBrush="Red"  VerticalAlignment="Center"
                         SmallChange="1" TickPlacement="BottomRight" Maximum="100" Minimum="0"
-                        Value="{Binding Path=Age, Mode=TwoWay}" IsSnapToTickEnabled="True"  BorderThickness="0" />
+                        Value="{Binding Path=Age, Mode=TwoWay, TargetNullValue=20}" IsSnapToTickEnabled="True"  BorderThickness="0" />
                 <Label Content="Waga: " FontSize="15" Width="50" HorizontalAlignment="Left" />
                 <Label  Content="{Binding Path=Value, ElementName=sliderWeight}"  FontSize="15" HorizontalAlignment="Left" />
                 <Slider x:Name="sliderWeight"  Width="300" Margin="5" BorderBrush="Red"  VerticalAlignment="Center"
                         SmallChange="1" TickPlacement="BottomRight"
-                        Maximum="150" Minimum="0" Value="{Binding Path=Weight, Mode=TwoWay}" IsSnapToTickEnabled="True"
+                        Maximum="150" Minimum="0" Value="{Binding Path=Weight, Mode=TwoWay, TargetNullValue=80}" IsSnapToTickEnabled="True"
                         BorderThickness="0" />
             </WrapPanel>
 
@@ -51,7 +51,8 @@
             </Grid>
         </StackPanel>
 
-        <ListBox x:Name="listBoxPilkarze" Grid.Column="1" FontSize="17" SelectedItem="{Binding Path=selectedFootballer}" >
+        <ListBox x:Name="listBoxPilkarze" Grid.Column="1" FontSize="17" ItemsSource="{Binding Path=StoredFootballers}"
+                 SelectedItem="{Binding Path=SelectedFootballer, Mode=OneWayToSource}" >
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{Binding Copy}" />
