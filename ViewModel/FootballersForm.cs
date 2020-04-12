@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace Footballers.ViewModel
+﻿namespace Footballers.ViewModel
 {
-    using System.Collections.ObjectModel;
-    using System.Linq;
+    using System.ComponentModel;
+    using System.IO;
+    using System.Text.Json;
     using System.Windows.Input;
 
     using Footballers.Model;
@@ -13,13 +12,14 @@ namespace Footballers.ViewModel
     {
         #region prop
 
-        private double? age = null;
+        private string dataPath = "DataFootballers.json";
+        private double? age = 25;
 
         private string forename = null;
 
         private string surname = null;
 
-        private double? weight = null;
+        private double? weight = 80;
 
         public double? Age
         {
@@ -29,6 +29,7 @@ namespace Footballers.ViewModel
                 OnPropertyChanged(nameof(Age));
             }
         }
+
         public string Forename
         {
             get => forename; set
@@ -38,8 +39,29 @@ namespace Footballers.ViewModel
             }
         }
 
-        public Footballer SelectedFootballer { get; set; } = null;
-        public ObservableCollection<Footballer> StoredFootballers { get; set;} = new ObservableCollection<Footballer>() { new Footballer("janek", "kowalski", 60, 60) };
+        private Footballer selectedFootballer = null;
+
+        public Footballer SelectedFootballer
+        {
+            get => selectedFootballer; set
+            {
+                selectedFootballer = value;
+                OnPropertyChanged(nameof(SelectedFootballer));
+                if (Copy.CanExecute(null)) Copy.Execute(null);
+            }
+        }
+
+        private BindingList<Footballer> storedFootballers = new BindingList<Footballer>();
+
+        public BindingList<Footballer> StoredFootballers
+        {
+            get => storedFootballers; set
+            {
+                storedFootballers = value;
+                OnPropertyChanged(nameof(StoredFootballers));
+            }
+        }
+
         public string Surname
         {
             get => surname; set
@@ -48,6 +70,7 @@ namespace Footballers.ViewModel
                 OnPropertyChanged(nameof(Surname));
             }
         }
+
         public double? Weight
         {
             get => weight; set
@@ -70,6 +93,45 @@ namespace Footballers.ViewModel
         private ICommand delete;
 
         private ICommand edit;
+
+        private ICommand loadData;
+
+        private ICommand saveData;
+
+        public ICommand LoadData
+        {
+            get
+            {
+                if (loadData is null)
+                {
+                    loadData = new RelayCommand(execute =>
+                    {
+                        var jsonFootballers = File.ReadAllText(dataPath);
+                        StoredFootballers = JsonSerializer.Deserialize<BindingList<Footballer>>(jsonFootballers);
+                        OnPropertyChanged(nameof(LoadData));
+                        StoredFootballers.ResetBindings();
+                    }, canExecute => File.Exists(dataPath) && (new FileInfo(dataPath).Length > 0));
+                }
+                return loadData;
+            }
+        }
+
+        public ICommand SaveData
+        {
+            get
+            {
+                if (saveData is null)
+                {
+                    saveData = new RelayCommand(execute =>
+                    {
+                        var jsonFootballers = JsonSerializer.Serialize(StoredFootballers);
+                        File.WriteAllText(dataPath, jsonFootballers);
+                        OnPropertyChanged(nameof(SaveData));
+                    }, canExecute => true);
+                }
+                return saveData;
+            }
+        }
 
         public ICommand Add
         {
@@ -127,7 +189,7 @@ namespace Footballers.ViewModel
                             Age = SelectedFootballer.Age;
                             Weight = SelectedFootballer.Weight;
                         }
-                        , canExecute => true
+                        , canExecute => SelectedFootballer != null
                     );
                 }
                 return copy;
@@ -165,8 +227,9 @@ namespace Footballers.ViewModel
                         var newFootballer = new Footballer(Forename, Surname, (double)Age, (double)Weight);
                         if (StoredFootballers.Contains(SelectedFootballer))
                         {
-                            StoredFootballers.Single(footballer => footballer.Equals(SelectedFootballer)).Copy(newFootballer);
-                            OnPropertyChanged(nameof(StoredFootballers));
+                            var index = StoredFootballers.IndexOf(selectedFootballer);
+                            StoredFootballers[index].Copy(newFootballer);
+                            StoredFootballers.ResetItem(index);
                         }
                     }, canExecute => FieldsNotNull && SelectedFootballer != null);
                 }

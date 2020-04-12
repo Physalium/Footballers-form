@@ -1,39 +1,30 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Input;
+using System.Linq;
 
-namespace Footballers
+namespace Footballers.View
 {
     /// <summary>
-    /// Interaction logic for TextBoxWithErrorProvider.xaml
+    /// Interaction logic for TextBoxForLetters.xaml
     /// </summary>
-    public partial class TextBoxWithErrorProvider : UserControl
+    public partial class TextBoxForLetters : UserControl
     {
-        public TextBoxWithErrorProvider()
+        public TextBoxForLetters()
         {
             InitializeComponent();
-            SetError("");
-        }
-        #region Prop
-
-        public static Brush BrushForAll { get; set; } = Brushes.Red;
-
-        public Brush TextBorderBrush
-        {
-            get;
-            set;
         }
 
-        #endregion Prop
-        #region Zdarzenie własne
+        #region Zdarznie własne
+
         //rejestracja zdarzenia tak, żeby możliwe było jego bindowanie
         public static readonly RoutedEvent TextChangedEvent =
         EventManager.RegisterRoutedEvent("TabItemSelected",
                      RoutingStrategy.Bubble, typeof(RoutedEventHandler),
-                     typeof(TextBoxWithErrorProvider));
+                     typeof(TextBoxForLetters));
 
         //definicja zdarzenia NumberChanged
-        public event RoutedEventHandler TextChanged
+        public event RoutedEventHandler NumberChanged
         {
             add { AddHandler(TextChangedEvent, value); }
             remove { RemoveHandler(TextChangedEvent, value); }
@@ -41,26 +32,29 @@ namespace Footballers
 
         //Metoda pomocnicza wywołująca zdarzenie
         //przy okazji metoda ta tworzy obiekt argument przekazywany przez to zdarzenie
-        void RaiseTextChanged()
+        private void RaiseTextChanged()
         {
             //argument zdarzenia
             RoutedEventArgs newEventArgs =
-                    new RoutedEventArgs(TextBoxWithErrorProvider.TextChangedEvent);
+                    new RoutedEventArgs(TextBoxForLetters.TextChangedEvent);
             //wywołanie zdarzenia
             RaiseEvent(newEventArgs);
         }
-        #endregion
+
+        #endregion Zdarznie własne
 
         #region Własność zależna
+
         //zarejestrowanie własności zależenej - taki mechanizm konieczny jest
         // aby możliwe było Bindowanie tej właśności z innnymi obiektami
         public static readonly DependencyProperty TextProperty =
             DependencyProperty.Register(
                 "Text",
                 typeof(string),
-                typeof(TextBoxWithErrorProvider),
+                typeof(TextBoxForLetters),
                 new FrameworkPropertyMetadata(null)
             );
+
         //"czysta" właściwość powiązania z właściwości zależną
         //do niej będziemy się odnosić w XAMLU
         public string Text
@@ -68,34 +62,33 @@ namespace Footballers
             get { return (string)GetValue(TextProperty); }
             set { SetValue(TextProperty, value); }
         }
-        #endregion
 
-        #region metody wewnetrzne
-       
+        #endregion Własność zależna
 
-        public void SetError(string errorText)
+        #region Metody obsługujące wewnętrzne zdarzenia kontrolki
+
+        //zdarzenie wywoływane zanim zmianie ulegnie tekst textBox-a
+        //e.Text  - string zawierający ostatnio dopisany znakm jeszcze niedodany do
+        //własności Text obiektu textBox
+        private void textBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (string.IsNullOrEmpty( errorText))
-            {
-                border.BorderThickness = new System.Windows.Thickness(0);
-                tooltipW.Visibility = System.Windows.Visibility.Hidden;
-                textBlockErrorText.Text = "";
-                return;
-            }
-            textBlockErrorText.Text = errorText;
-            border.BorderThickness = new System.Windows.Thickness(1);
-            tooltipW.Visibility = System.Windows.Visibility.Visible;
+            if (!e.Text.All(char.IsLetter)) e.Handled = true;
+            
         }
 
-        public void SetFocus()
+        private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            textBlockErrorText.Focus();
+            //przy każdej zmianie tekstu w polu textBox
+            //wyrzucamy zdarzenie, które informuje o tym,
+            //że zmieniła się liczba
+            RaiseTextChanged();
         }
 
-        private void textBoxContent_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        #endregion Metody obsługujące wewnętrzne zdarzenia kontrolki
+
+        private void textBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (decimal.TryParse(e.Text, out _)) e.Handled = true;
+            if (e.Key == Key.Space) e.Handled = true;
         }
-        #endregion
     }
 }

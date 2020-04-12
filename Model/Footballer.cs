@@ -20,6 +20,10 @@ namespace Footballers.Model
 
         #region constructor
 
+        public Footballer()
+        {
+        }
+
         public Footballer(string forename, string surname, double age, double weight)
         {
             this.Forename = forename;
@@ -35,35 +39,9 @@ namespace Footballers.Model
             return $"{Forename} {Surname}, Wiek: {Age} lat, {Weight}kg";
         }
 
-        public bool isTheSame(Footballer pilkarz)
-        {
-            if (pilkarz.Surname != Surname) return false;
-            if (pilkarz.Forename != Forename) return false;
-            if (pilkarz.Age != Age) return false;
-            if (pilkarz.Weight != Weight) return false;
-            return true;
-        }
+        
 
-        public string ToFileFormat()
-        {
-            return $"{Surname}|{Forename}|{Age}|{Weight}";
-        }
-
-        public static Footballer CreateFromString(string sPilkarz)
-        {
-            string imie, nazwisko;
-            uint wiek, waga;
-            var pola = sPilkarz.Split('|');
-            if (pola.Length == 4)
-            {
-                nazwisko = pola[1];
-                imie = pola[0];
-                wiek = uint.Parse(pola[2]);
-                waga = uint.Parse(pola[3]);
-                return new Footballer(imie, nazwisko, wiek, waga);
-            }
-            throw new Exception("Błędny format danych z pliku");
-        }
+        
 
         public void Copy(Footballer pilkarz)
         {
