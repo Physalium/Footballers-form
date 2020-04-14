@@ -1,7 +1,7 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Linq;
 
 namespace Footballers.View
 {
@@ -73,7 +73,6 @@ namespace Footballers.View
         private void textBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (!e.Text.All(char.IsLetter)) e.Handled = true;
-            
         }
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)

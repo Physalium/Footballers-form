@@ -147,6 +147,8 @@
                             {
                                 StoredFootballers.Add(footballer);
                                 OnPropertyChanged(nameof(StoredFootballers));
+                                Clear.Execute(null);
+
                             }
                         }
                         , canExecute => FieldsNotNull
@@ -230,6 +232,8 @@
                             var index = StoredFootballers.IndexOf(selectedFootballer);
                             StoredFootballers[index].Copy(newFootballer);
                             StoredFootballers.ResetItem(index);
+                            Clear.Execute(null);
+
                         }
                     }, canExecute => FieldsNotNull && SelectedFootballer != null);
                 }
@@ -241,7 +245,6 @@
 
         public FootballersForm()
         {
-            //wczytywanie z json
         }
 
         private bool FieldsNotNull { get { return (!string.IsNullOrEmpty(Forename) && !string.IsNullOrEmpty(Surname) && Age > 0 && Weight > 0); } }

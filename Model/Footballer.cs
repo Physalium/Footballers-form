@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Footballers.Model
+﻿namespace Footballers.Model
 {
     internal class Footballer
     {
@@ -38,10 +36,6 @@ namespace Footballers.Model
         {
             return $"{Forename} {Surname}, Wiek: {Age} lat, {Weight}kg";
         }
-
-        
-
-        
 
         public void Copy(Footballer pilkarz)
         {
